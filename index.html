@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>30-Day Command Protocol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+--bg: #0a0a0a;
+--surface: #111111;
+--border: #1e1e1e;
+--accent: #c8f04a;
+--accent2: #ff5c35;
+--muted: #444;
+--text: #e8e8e8;
+--text-dim: #666;
+--phase1: #c8f04a;
+--phase2: #4af0c8;
+--phase3: #f04a4a;
+--phase4: #c84af0;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘DM Sans’, sans-serif;
+font-size: 14px;
+line-height: 1.6;
+min-height: 100vh;
+}
+
+/* HEADER */
+header {
+border-bottom: 1px solid var(–border);
+padding: 28px 32px 24px;
+display: flex;
+align-items: flex-end;
+justify-content: space-between;
+gap: 16px;
+flex-wrap: wrap;
+position: sticky;
+top: 0;
+background: rgba(10,10,10,0.95);
+backdrop-filter: blur(12px);
+z-index: 100;
+}
+.logo {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 2.4rem;
+letter-spacing: 3px;
+color: var(–accent);
+line-height: 1;
+}
+.logo span { color: var(–text-dim); font-size: 1rem; letter-spacing: 6px; display: block; margin-bottom: 4px; font-family: ‘DM Mono’, monospace; }
+.header-meta {
+text-align: right;
+font-family: ‘DM Mono’, monospace;
+font-size: 11px;
+color: var(–text-dim);
+line-height: 1.8;
+}
+.header-meta strong { color: var(–accent); font-size: 18px; display: block; }
+
+/* PROGRESS BAR */
+.global-progress {
+padding: 20px 32px;
+border-bottom: 1px solid var(–border);
+background: var(–surface);
+}
+.progress-label {
+display: flex;
+justify-content: space-between;
+font-family: ‘DM Mono’, monospace;
+font-size: 11px;
+color: var(–text-dim);
+margin-bottom: 8px;
+}
+.progress-track {
+width: 100%;
+height: 4px;
+background: var(–border);
+border-radius: 2px;
+overflow: hidden;
+}
+.progress-fill {
+height: 100%;
+background: linear-gradient(90deg, var(–phase1), var(–phase2), var(–phase3), var(–phase4));
+border-radius: 2px;
+transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* MAIN LAYOUT */
+.container {
+max-width: 1100px;
+margin: 0 auto;
+padding: 32px;
+}
+
+/* OBJECTIVE CARD */
+.objective-card {
+border: 1px solid var(–border);
+background: var(–surface);
+padding: 28px 32px;
+margin-bottom: 32px;
+position: relative;
+overflow: hidden;
+}
+.objective-card::before {
+content: ‘’;
+position: absolute;
+top: 0; left: 0;
+width: 3px;
+height: 100%;
+background: var(–accent);
+}
+.objective-card h2 {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 1.2rem;
+letter-spacing: 4px;
+color: var(–text-dim);
+margin-bottom: 16px;
+}
+.objectives {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+gap: 16px;
+}
+.obj-item {
+display: flex;
+align-items: flex-start;
+gap: 12px;
+}
+.obj-icon {
+width: 28px;
+height: 28px;
+background: rgba(200,240,74,0.1);
+border: 1px solid var(–accent);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 12px;
+flex-shrink: 0;
+margin-top: 2px;
+}
+.obj-text { font-size: 13px; color: var(–text); }
+
+/* PHASE TABS */
+.phase-tabs {
+display: flex;
+gap: 4px;
+margin-bottom: 24px;
+flex-wrap: wrap;
+}
+.phase-tab {
+font-family: ‘DM Mono’, monospace;
+font-size: 11px;
+letter-spacing: 2px;
+padding: 8px 16px;
+border: 1px solid var(–border);
+background: none;
+color: var(–text-dim);
+cursor: pointer;
+text-transform: uppercase;
+transition: all 0.2s;
+}
+.phase-tab:hover { border-color: var(–muted); color: var(–text); }
+.phase-tab.active { border-color: var(–accent); color: var(–accent); background: rgba(200,240,74,0.05); }
+.phase-tab[data-phase=“2”].active { border-color: var(–phase2); color: var(–phase2); background: rgba(74,240,200,0.05); }
+.phase-tab[data-phase=“3”].active { border-color: var(–phase3); color: var(–phase3); background: rgba(240,74,74,0.05); }
+.phase-tab[data-phase=“4”].active { border-color: var(–phase4); color: var(–phase4); background: rgba(200,74,240,0.05); }
+
+/* PHASE PANELS */
+.phase-panel { display: none; }
+.phase-panel.active { display: block; }
+
+.phase-header {
+display: flex;
+align-items: baseline;
+gap: 16px;
+margin-bottom: 8px;
+}
+.phase-title {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 2rem;
+letter-spacing: 3px;
+}
+.phase-range {
+font-family: ‘DM Mono’, monospace;
+font-size: 11px;
+color: var(–text-dim);
+letter-spacing: 2px;
+}
+.phase-focus {
+font-size: 13px;
+color: var(–text-dim);
+margin-bottom: 24px;
+font-style: italic;
+}
+
+/* DAY GRID */
+.day-grid {
+display: grid;
+grid-template-columns: repeat(7, 1fr);
+gap: 6px;
+margin-bottom: 32px;
+}
+.day-cell {
+aspect-ratio: 1;
+border: 1px solid var(–border);
+background: var(–surface);
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+transition: all 0.2s;
+position: relative;
+font-family: ‘DM Mono’, monospace;
+font-size: 12px;
+color: var(–text-dim);
+user-select: none;
+}
+.day-cell:hover { border-color: var(–muted); background: #161616; }
+.day-cell.done { background: rgba(200,240,74,0.08); border-color: rgba(200,240,74,0.3); color: var(–accent); }
+.day-cell.done::after {
+content: ‘✓’;
+font-size: 10px;
+position: absolute;
+top: 4px; right: 5px;
+color: var(–accent);
+}
+.day-cell.today { border-color: var(–accent2) !important; color: var(–text); }
+.day-cell.today .day-num { color: var(–accent2); }
+.day-num { font-size: 14px; font-weight: 500; }
+.day-label { font-size: 9px; letter-spacing: 1px; margin-top: 2px; }
+
+/* Adjust colors per phase */
+.phase-2 .day-cell.done { background: rgba(74,240,200,0.08); border-color: rgba(74,240,200,0.3); color: var(–phase2); }
+.phase-2 .day-cell.done::after { color: var(–phase2); }
+.phase-3 .day-cell.done { background: rgba(240,74,74,0.08); border-color: rgba(240,74,74,0.3); color: var(–phase3); }
+.phase-3 .day-cell.done::after { color: var(–phase3); }
+.phase-4 .day-cell.done { background: rgba(200,74,240,0.08); border-color: rgba(200,74,240,0.3); color: var(–phase4); }
+.phase-4 .day-cell.done::after { color: var(–phase4); }
+
+/* SYSTEMS */
+.systems-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+gap: 12px;
+margin-bottom: 32px;
+}
+.system-card {
+border: 1px solid var(–border);
+background: var(–surface);
+padding: 20px;
+position: relative;
+overflow: hidden;
+}
+.system-num {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 3rem;
+color: var(–border);
+position: absolute;
+top: 8px; right: 12px;
+line-height: 1;
+pointer-events: none;
+}
+.system-name {
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+letter-spacing: 3px;
+color: var(–accent);
+text-transform: uppercase;
+margin-bottom: 8px;
+}
+.system-title {
+font-size: 15px;
+font-weight: 500;
+margin-bottom: 6px;
+}
+.system-desc { font-size: 12px; color: var(–text-dim); }
+
+/* DAILY LOG */
+.daily-log-section {
+border: 1px solid var(–border);
+background: var(–surface);
+padding: 24px;
+margin-bottom: 32px;
+}
+.section-title {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 1.1rem;
+letter-spacing: 4px;
+color: var(–text-dim);
+margin-bottom: 20px;
+display: flex;
+align-items: center;
+gap: 12px;
+}
+.section-title::after {
+content: ‘’;
+flex: 1;
+height: 1px;
+background: var(–border);
+}
+.log-day-selector {
+font-family: ‘DM Mono’, monospace;
+font-size: 12px;
+background: var(–bg);
+border: 1px solid var(–border);
+color: var(–text);
+padding: 8px 12px;
+width: 100%;
+max-width: 200px;
+margin-bottom: 16px;
+cursor: pointer;
+}
+.checklist { list-style: none; }
+.checklist li {
+display: flex;
+align-items: flex-start;
+gap: 12px;
+padding: 10px 0;
+border-bottom: 1px solid var(–border);
+font-size: 13px;
+}
+.checklist li:last-child { border-bottom: none; }
+.checklist input[type=“checkbox”] {
+width: 16px;
+height: 16px;
+accent-color: var(–accent);
+margin-top: 2px;
+flex-shrink: 0;
+cursor: pointer;
+}
+.check-label { cursor: pointer; color: var(–text); transition: color 0.2s; }
+.check-label.checked { color: var(–text-dim); text-decoration: line-through; }
+
+.metric-row {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 12px;
+margin-top: 16px;
+}
+.metric-btn {
+border: 1px solid var(–border);
+background: none;
+padding: 14px;
+text-align: left;
+cursor: pointer;
+transition: all 0.2s;
+font-family: ‘DM Sans’, sans-serif;
+}
+.metric-btn:hover { border-color: var(–muted); background: #161616; }
+.metric-btn.yes { border-color: var(–accent2); background: rgba(255,92,53,0.08); }
+.metric-btn.no { border-color: var(–accent); background: rgba(200,240,74,0.08); }
+.metric-q { font-size: 12px; color: var(–text-dim); margin-bottom: 4px; font-family: ‘DM Mono’, monospace; letter-spacing: 1px; }
+.metric-a { font-size: 22px; font-family: ‘Bebas Neue’, sans-serif; letter-spacing: 2px; color: var(–text); }
+
+/* SCENARIOS */
+.scenarios-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+gap: 12px;
+margin-bottom: 32px;
+}
+.scenario-card {
+border: 1px solid var(–border);
+background: var(–surface);
+padding: 20px;
+}
+.scenario-tag {
+font-family: ‘DM Mono’, monospace;
+font-size: 9px;
+letter-spacing: 3px;
+text-transform: uppercase;
+color: var(–text-dim);
+margin-bottom: 10px;
+}
+.scenario-title { font-size: 14px; font-weight: 500; margin-bottom: 12px; }
+.old-new { font-size: 12px; line-height: 1.8; }
+.old { color: var(–accent2); }
+.new { color: var(–accent); }
+.old-label, .new-label {
+font-family: ‘DM Mono’, monospace;
+font-size: 9px;
+letter-spacing: 2px;
+display: block;
+margin-top: 8px;
+color: var(–text-dim);
+}
+
+/* MENTAL MODEL */
+.mental-model {
+border: 1px solid var(–border);
+background: var(–surface);
+padding: 32px;
+margin-bottom: 32px;
+text-align: center;
+position: relative;
+overflow: hidden;
+}
+.mental-model::before {
+content: ‘”’;
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 20rem;
+color: var(–border);
+position: absolute;
+top: -60px; left: -20px;
+line-height: 1;
+pointer-events: none;
+}
+.rule-line {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 2rem;
+letter-spacing: 4px;
+color: var(–accent);
+margin: 12px 0;
+position: relative;
+}
+.rule-line.dim { color: var(–text-dim); font-size: 1.2rem; }
+
+/* WEEKLY CHECK */
+.weekly-check {
+border: 1px solid var(–border);
+background: var(–surface);
+padding: 24px;
+margin-bottom: 32px;
+}
+.week-tabs {
+display: flex;
+gap: 4px;
+margin-bottom: 20px;
+flex-wrap: wrap;
+}
+.week-tab {
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+letter-spacing: 2px;
+padding: 6px 14px;
+border: 1px solid var(–border);
+background: none;
+color: var(–text-dim);
+cursor: pointer;
+transition: all 0.2s;
+}
+.week-tab:hover { border-color: var(–muted); color: var(–text); }
+.week-tab.active { border-color: var(–accent); color: var(–accent); }
+.weekly-questions { list-style: none; }
+.weekly-questions li {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px 0;
+border-bottom: 1px solid var(–border);
+font-size: 13px;
+}
+.weekly-questions li:last-child { border-bottom: none; }
+.wq-btns { display: flex; gap: 6px; margin-left: auto; flex-shrink: 0; }
+.wq-btn {
+font-family: ‘DM Mono’, monospace;
+font-size: 9px;
+letter-spacing: 1px;
+padding: 5px 10px;
+border: 1px solid var(–border);
+background: none;
+color: var(–text-dim);
+cursor: pointer;
+transition: all 0.2s;
+}
+.wq-btn.yes-active { border-color: var(–accent); color: var(–accent); background: rgba(200,240,74,0.08); }
+.wq-btn.no-active { border-color: var(–accent2); color: var(–accent2); background: rgba(255,92,53,0.08); }
+
+/* FOOTER */
+footer {
+border-top: 1px solid var(–border);
+padding: 24px 32px;
+text-align: center;
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+color: var(–text-dim);
+letter-spacing: 2px;
+}
+
+/* TOAST */
+.toast {
+position: fixed;
+bottom: 24px;
+left: 50%;
+transform: translateX(-50%) translateY(80px);
+background: var(–accent);
+color: #0a0a0a;
+font-family: ‘DM Mono’, monospace;
+font-size: 12px;
+letter-spacing: 2px;
+padding: 12px 24px;
+opacity: 0;
+transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+pointer-events: none;
+white-space: nowrap;
+z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 600px) {
+.container { padding: 20px 16px; }
+header { padding: 20px 16px; }
+.day-grid { grid-template-columns: repeat(4, 1fr); }
+.rule-line { font-size: 1.4rem; }
+.mental-model::before { font-size: 10rem; }
+}
+</style>
+
+</head>
+<body>
+
+<!-- HEADER -->
+
+<header>
+<div class="logo">
+<span>30-DAY</span>
+Command Protocol
+</div>
+<div class="header-meta">
+<strong id="day-count">—</strong>
+DAYS COMPLETED
+<br>STARTED: <span id="start-date-display">NOT SET</span>
+<br><button onclick="resetStart()" style="background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;padding:4px 8px;cursor:pointer;margin-top:4px;" id="start-btn">SET START DATE</button>
+</div>
+</header>
+
+<!-- GLOBAL PROGRESS -->
+
+<div class="global-progress">
+<div class="progress-label">
+<span>OVERALL PROGRESS</span>
+<span id="pct-label">0 / 30</span>
+</div>
+<div class="progress-track">
+<div class="progress-fill" id="global-fill" style="width:0%"></div>
+</div>
+</div>
+
+<div class="container">
+
+<!-- OBJECTIVE -->
+
+<div class="objective-card">
+<h2>OBJECTIVE · BY DAY 30</h2>
+<div class="objectives">
+<div class="obj-item">
+<div class="obj-icon">↓</div>
+<div class="obj-text">Speak 30–40% less, but with sharper impact</div>
+</div>
+<div class="obj-item">
+<div class="obj-icon">◎</div>
+<div class="obj-text">Zero visible irritation in repeated-question scenarios</div>
+</div>
+<div class="obj-item">
+<div class="obj-icon">⬆</div>
+<div class="obj-text">Perceived as calm, structured, and leadership-ready</div>
+</div>
+</div>
+</div>
+
+<!-- SYSTEMS -->
+
+<div class="section-title">CORE SYSTEMS</div>
+<div class="systems-grid">
+<div class="system-card">
+<div class="system-num">1</div>
+<div class="system-name">System 01</div>
+<div class="system-title">Response Delay System</div>
+<div class="system-desc">Prevents impulsive speech. 2-second mandatory pause before every response.</div>
+</div>
+<div class="system-card">
+<div class="system-num">2</div>
+<div class="system-name">System 02</div>
+<div class="system-title">Structured Communication</div>
+<div class="system-desc">Improves clarity. Frame every point with "There are 2 things…" or "Main issue is…"</div>
+</div>
+<div class="system-card">
+<div class="system-num">3</div>
+<div class="system-name">System 03</div>
+<div class="system-title">Emotional Regulation</div>
+<div class="system-desc">Controls irritation. Pause → Label → Reframe. Speak slower when triggered.</div>
+</div>
+</div>
+
+<!-- PHASE TABS -->
+
+<div class="phase-tabs">
+<button class="phase-tab active" data-phase="1" onclick="showPhase(1)">PHASE 1 · D1–7</button>
+<button class="phase-tab" data-phase="2" onclick="showPhase(2)">PHASE 2 · D8–15</button>
+<button class="phase-tab" data-phase="3" onclick="showPhase(3)">PHASE 3 · D16–23</button>
+<button class="phase-tab" data-phase="4" onclick="showPhase(4)">PHASE 4 · D24–30</button>
+</div>
+
+<!-- PHASE 1 -->
+
+<div class="phase-panel active" id="panel-1">
+<div class="phase-header">
+<div class="phase-title" style="color:var(--phase1)">AWARENESS</div>
+<div class="phase-range">DAY 01 → 07</div>
+</div>
+<div class="phase-focus">Focus: Catch yourself in real-time. Interrupt the pattern.</div>
+<div class="day-grid" id="grid-phase1"></div>
+<ul class="checklist" id="tasks-phase1">
+<li><input type="checkbox" id="p1t1" onchange="saveCheck(this)"><label class="check-label" for="p1t1">Mandatory 2-second pause before EVERY response</label></li>
+<li><input type="checkbox" id="p1t2" onchange="saveCheck(this)"><label class="check-label" for="p1t2">Reduce speaking volume by 20% — say only the main point</label></li>
+<li><input type="checkbox" id="p1t3" onchange="saveCheck(this)"><label class="check-label" for="p1t3">Stop explaining everything — one idea at a time</label></li>
+<li><input type="checkbox" id="p1t4" onchange="saveCheck(this)"><label class="check-label" for="p1t4">Nightly metric check: "Did I speak unnecessarily?"</label></li>
+<li><input type="checkbox" id="p1t5" onchange="saveCheck(this)"><label class="check-label" for="p1t5">Nightly metric check: "Did I get visibly irritated?"</label></li>
+</ul>
+</div>
+
+<!-- PHASE 2 -->
+
+<div class="phase-panel" id="panel-2">
+<div class="phase-header">
+<div class="phase-title" style="color:var(--phase2)">REPLACE</div>
+<div class="phase-range">DAY 08 → 15</div>
+</div>
+<div class="phase-focus">Focus: Don't just stop bad patterns — replace them with better ones.</div>
+<div class="day-grid phase-2" id="grid-phase2"></div>
+<ul class="checklist" id="tasks-phase2">
+<li><input type="checkbox" id="p2t1" onchange="saveCheck(this)"><label class="check-label" for="p2t1">Use structured openers: "There are 2 things…" / "Short answer is…"</label></li>
+<li><input type="checkbox" id="p2t2" onchange="saveCheck(this)"><label class="check-label" for="p2t2">Replace irritation with script: "Let me explain it in a simpler way"</label></li>
+<li><input type="checkbox" id="p2t3" onchange="saveCheck(this)"><label class="check-label" for="p2t3">Use: "I think I missed something earlier" when someone repeats</label></li>
+<li><input type="checkbox" id="p2t4" onchange="saveCheck(this)"><label class="check-label" for="p2t4">Ask before explaining: "What part is unclear? / Where are you stuck?"</label></li>
+<li><input type="checkbox" id="p2t5" onchange="saveCheck(this)"><label class="check-label" for="p2t5">Cut off over-explaining mid-way: "That's the main idea. We can go deeper if needed."</label></li>
+</ul>
+</div>
+
+<!-- PHASE 3 -->
+
+<div class="phase-panel" id="panel-3">
+<div class="phase-header">
+<div class="phase-title" style="color:var(--phase3)">REGULATE</div>
+<div class="phase-range">DAY 16 → 23</div>
+</div>
+<div class="phase-focus">Focus: Handle internal triggers. Rewire emotional defaults.</div>
+<div class="day-grid phase-3" id="grid-phase3"></div>
+<ul class="checklist" id="tasks-phase3">
+<li><input type="checkbox" id="p3t1" onchange="saveCheck(this)"><label class="check-label" for="p3t1">Identify your top 3 triggers — mentally note them tonight</label></li>
+<li><input type="checkbox" id="p3t2" onchange="saveCheck(this)"><label class="check-label" for="p3t2">3-step loop: Pause → Label internally → Reframe as leadership moment</label></li>
+<li><input type="checkbox" id="p3t3" onchange="saveCheck(this)"><label class="check-label" for="p3t3">When triggered: deliberately speak 10–20% slower, lower tone</label></li>
+<li><input type="checkbox" id="p3t4" onchange="saveCheck(this)"><label class="check-label" for="p3t4">Practice saying "Let me complete quickly…" instead of reacting to interruptions</label></li>
+<li><input type="checkbox" id="p3t5" onchange="saveCheck(this)"><label class="check-label" for="p3t5">Recovery script when you say something impulsive: "Let me rephrase that more clearly"</label></li>
+</ul>
+</div>
+
+<!-- PHASE 4 -->
+
+<div class="phase-panel" id="panel-4">
+<div class="phase-header">
+<div class="phase-title" style="color:var(--phase4)">LEAD</div>
+<div class="phase-range">DAY 24 → 30</div>
+</div>
+<div class="phase-focus">Focus: Move from control to influence. Become the calm in the room.</div>
+<div class="day-grid phase-4" id="grid-phase4"></div>
+<ul class="checklist" id="tasks-phase4">
+<li><input type="checkbox" id="p4t1" onchange="saveCheck(this)"><label class="check-label" for="p4t1">In meetings: let others speak, speak last, summarize — "So we have 3 options here…"</label></li>
+<li><input type="checkbox" id="p4t2" onchange="saveCheck(this)"><label class="check-label" for="p4t2">Handle repeat questions proactively: "This comes up often, let me clarify clearly once…"</label></li>
+<li><input type="checkbox" id="p4t3" onchange="saveCheck(this)"><label class="check-label" for="p4t3">Introduce intentional silence — don't rush to fill gaps</label></li>
+<li><input type="checkbox" id="p4t4" onchange="saveCheck(this)"><label class="check-label" for="p4t4">Create reusable explanations for recurring questions</label></li>
+<li><input type="checkbox" id="p4t5" onchange="saveCheck(this)"><label class="check-label" for="p4t5">End-of-30-day review: have the 3 objectives been met?</label></li>
+</ul>
+</div>
+
+<!-- DAILY METRICS -->
+
+<div class="daily-log-section">
+<div class="section-title">DAILY LOG</div>
+<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);margin-bottom:12px;">SELECT DAY TO LOG</div>
+<select class="log-day-selector" id="log-day-select" onchange="loadDayLog()">
+</select>
+<div class="metric-row">
+<button class="metric-btn" id="spoke-btn" onclick="toggleMetric('spoke')">
+<div class="metric-q">SPOKE UNNECESSARILY?</div>
+<div class="metric-a" id="spoke-val">—</div>
+</button>
+<button class="metric-btn" id="irritated-btn" onclick="toggleMetric('irritated')">
+<div class="metric-q">VISIBLE IRRITATION?</div>
+<div class="metric-a" id="irritated-val">—</div>
+</button>
+</div>
+</div>
+
+<!-- SCENARIOS -->
+
+<div class="section-title">REAL-LIFE SCRIPTS</div>
+<div class="scenarios-grid">
+<div class="scenario-card">
+<div class="scenario-tag">Scenario 01</div>
+<div class="scenario-title">Same question again</div>
+<div class="old-new">
+<span class="old-label">OLD RESPONSE</span>
+<span class="old">"I already told you this!"</span>
+<span class="new-label">NEW RESPONSE</span>
+<span class="new">"Let me simplify this…"</span>
+</div>
+</div>
+<div class="scenario-card">
+<div class="scenario-tag">Scenario 02</div>
+<div class="scenario-title">Over-explaining urge</div>
+<div class="old-new">
+<span class="old-label">OLD RESPONSE</span>
+<span class="old">Keep talking past the point</span>
+<span class="new-label">NEW RESPONSE</span>
+<span class="new">"That's the main idea. We can go deeper if needed."</span>
+</div>
+</div>
+<div class="scenario-card">
+<div class="scenario-tag">Scenario 03</div>
+<div class="scenario-title">Getting interrupted</div>
+<div class="old-new">
+<span class="old-label">OLD RESPONSE</span>
+<span class="old">React. Raise voice.</span>
+<span class="new-label">NEW RESPONSE</span>
+<span class="new">"Let me complete quickly…"</span>
+</div>
+</div>
+<div class="scenario-card">
+<div class="scenario-tag">Scenario 04</div>
+<div class="scenario-title">Said something impulsive</div>
+<div class="old-new">
+<span class="old-label">OLD RESPONSE</span>
+<span class="old">Double down or go quiet</span>
+<span class="new-label">NEW RESPONSE</span>
+<span class="new">"Let me rephrase that more clearly…"</span>
+</div>
+</div>
+</div>
+
+<!-- WEEKLY CHECK -->
+
+<div class="weekly-check">
+<div class="section-title">WEEKLY SELF-CHECK</div>
+<div class="week-tabs">
+<button class="week-tab active" data-week="1" onclick="showWeek(1)">WEEK 1</button>
+<button class="week-tab" data-week="2" onclick="showWeek(2)">WEEK 2</button>
+<button class="week-tab" data-week="3" onclick="showWeek(3)">WEEK 3</button>
+<button class="week-tab" data-week="4" onclick="showWeek(4)">WEEK 4</button>
+</div>
+<ul class="weekly-questions" id="weekly-list"></ul>
+</div>
+
+<!-- MENTAL MODEL -->
+
+<div class="mental-model">
+<div class="rule-line dim">REPLACE THIS BELIEF</div>
+<div class="rule-line" style="color:var(--accent2)">I NEED TO PROVE I KNOW THINGS</div>
+<div class="rule-line dim" style="margin-top:24px;">WITH THIS ONE</div>
+<div class="rule-line">I NEED TO COMMUNICATE EFFECTIVELY</div>
+<div style="margin-top:32px;border-top:1px solid var(--border);padding-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:400px;margin-left:auto;margin-right:auto;">
+<div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);letter-spacing:2px;">CLARITY > QUANTITY</div>
+<div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);letter-spacing:2px;">RESPONSE > REACTION</div>
+</div>
+</div>
+
+</div>
+
+<footer>COMMAND PROTOCOL · 30-DAY BEHAVIORAL UPGRADE · BUILT FOR EXECUTION</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORE_KEY = 'cmd_protocol_v1';
+
+function load() {
+try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+catch { return {}; }
+}
+function save(data) {
+localStorage.setItem(STORE_KEY, JSON.stringify(data));
+}
+
+let state = load();
+
+// --- START DATE ---
+function getStartDate() {
+return state.startDate ? new Date(state.startDate) : null;
+}
+function resetStart() {
+const today = new Date().toISOString().split('T')[0];
+const d = prompt('Enter start date (YYYY-MM-DD):', today);
+if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) {
+state.startDate = d;
+save(state);
+renderAll();
+showToast('START DATE SET');
+}
+}
+function getDayNumber() {
+const s = getStartDate();
+if (!s) return null;
+const diff = Math.floor((Date.now() - s.getTime()) / 86400000) + 1;
+return Math.max(1, Math.min(30, diff));
+}
+function renderStartDate() {
+const s = getStartDate();
+document.getElementById('start-date-display').textContent = s ? s.toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) : 'NOT SET';
+document.getElementById('start-btn').textContent = s ? 'CHANGE DATE' : 'SET START DATE';
+}
+
+// --- DAY GRIDS ---
+const phaseRanges = { 1:[1,7], 2:[8,15], 3:[16,23], 4:[24,30] };
+function buildGrids() {
+for (let p=1;p<=4;p++) {
+const [start,end] = phaseRanges[p];
+const grid = document.getElementById('grid-phase'+p);
+grid.innerHTML = '';
+const today = getDayNumber();
+for (let d=start;d<=end;d++) {
+const cell = document.createElement('div');
+cell.className = 'day-cell';
+const isDone = state.days && state.days[d];
+if (isDone) cell.classList.add('done');
+if (today === d) cell.classList.add('today');
+cell.innerHTML = `<span class="day-num">${String(d).padStart(2,'0')}</span><span class="day-label">DAY</span>`;
+cell.onclick = () => toggleDay(d);
+grid.appendChild(cell);
+}
+}
+}
+
+function toggleDay(d) {
+if (!state.days) state.days = {};
+state.days[d] = !state.days[d];
+save(state);
+buildGrids();
+updateProgress();
+showToast(state.days[d] ? `DAY ${d} COMPLETE` : `DAY ${d} UNMARKED`);
+}
+
+// --- PROGRESS ---
+function updateProgress() {
+const done = state.days ? Object.values(state.days).filter(Boolean).length : 0;
+document.getElementById('day-count').textContent = done;
+document.getElementById('pct-label').textContent = `${done} / 30`;
+document.getElementById('global-fill').style.width = (done/30*100)+'%';
+}
+
+// --- CHECKBOXES ---
+function saveCheck(el) {
+if (!state.checks) state.checks = {};
+state.checks[el.id] = el.checked;
+el.nextElementSibling.classList.toggle('checked', el.checked);
+save(state);
+}
+function loadChecks() {
+document.querySelectorAll('.checklist input[type="checkbox"]').forEach(el => {
+if (state.checks && state.checks[el.id] !== undefined) {
+el.checked = state.checks[el.id];
+el.nextElementSibling.classList.toggle('checked', el.checked);
+}
+});
+}
+
+// --- PHASES ---
+function showPhase(n) {
+document.querySelectorAll('.phase-panel').forEach(p => p.classList.remove('active'));
+document.querySelectorAll('.phase-tab').forEach(t => t.classList.remove('active'));
+document.getElementById('panel-'+n).classList.add('active');
+document.querySelector(`.phase-tab[data-phase="${n}"]`).classList.add('active');
+}
+
+// --- DAILY LOG ---
+function buildDaySelect() {
+const sel = document.getElementById('log-day-select');
+sel.innerHTML = '';
+for (let d=1;d<=30;d++) {
+const o = document.createElement('option');
+o.value = d;
+o.textContent = `Day ${String(d).padStart(2,'0')}`;
+sel.appendChild(o);
+}
+const today = getDayNumber();
+if (today) sel.value = today;
+loadDayLog();
+}
+function loadDayLog() {
+const d = document.getElementById('log-day-select').value;
+const log = (state.dailyLog && state.dailyLog[d]) || {};
+renderMetric('spoke', log.spoke);
+renderMetric('irritated', log.irritated);
+}
+function renderMetric(key, val) {
+const btn = document.getElementById(key+'-btn');
+const el = document.getElementById(key+'-val');
+btn.classList.remove('yes','no');
+if (val === true) { el.textContent='YES'; btn.classList.add('yes'); }
+else if (val === false) { el.textContent='NO'; btn.classList.add('no'); }
+else { el.textContent='—'; }
+}
+function toggleMetric(key) {
+const d = document.getElementById('log-day-select').value;
+if (!state.dailyLog) state.dailyLog = {};
+if (!state.dailyLog[d]) state.dailyLog[d] = {};
+const cur = state.dailyLog[d][key];
+state.dailyLog[d][key] = cur === undefined ? true : cur === true ? false : undefined;
+save(state);
+loadDayLog();
+}
+
+// --- WEEKLY CHECK ---
+const weekQuestions = {
+1: ["Am I pausing before speaking?", "Am I speaking less but better?", "Am I controlling visible irritation?"],
+2: ["Am I using structured openers?", "Am I replacing irritation with scripts?", "Am I asking instead of explaining?"],
+3: ["Am I identifying my triggers?", "Am I using the 3-step loop?", "Am I slowing down when triggered?"],
+4: ["Am I letting others speak first?", "Am I using intentional silence?", "Have all 3 objectives been met?"]
+};
+let currentWeek = 1;
+function showWeek(n) {
+currentWeek = n;
+document.querySelectorAll('.week-tab').forEach(t => {
+t.classList.toggle('active', parseInt(t.dataset.week) === n);
+});
+renderWeeklyList();
+}
+function renderWeeklyList() {
+const list = document.getElementById('weekly-list');
+list.innerHTML = '';
+weekQuestions[currentWeek].forEach((q, i) => {
+const key = `w${currentWeek}q${i}`;
+const val = state.weekly && state.weekly[key];
+const li = document.createElement('li');
+li.innerHTML = `<span style="flex:1">${q}</span>
+<div class="wq-btns">
+<button class="wq-btn ${val===true?'yes-active':''}" onclick="setWeekly('${key}',true)">YES</button>
+<button class="wq-btn ${val===false?'no-active':''}" onclick="setWeekly('${key}',false)">NO</button>
+</div>`;
+list.appendChild(li);
+});
+}
+function setWeekly(key, val) {
+if (!state.weekly) state.weekly = {};
+state.weekly[key] = state.weekly[key] === val ? undefined : val;
+save(state);
+renderWeeklyList();
+}
+
+// --- TOAST ---
+function showToast(msg) {
+const t = document.getElementById('toast');
+t.textContent = msg;
+t.classList.add('show');
+setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// --- INIT ---
+function renderAll() {
+renderStartDate();
+buildGrids();
+updateProgress();
+buildDaySelect();
+loadChecks();
+renderWeeklyList();
+}
+renderAll();
+</script>
+
+</body>
+</html>
